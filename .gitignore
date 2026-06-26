@@ -1,0 +1,24 @@
+# Flutter / Dart
+.dart_tool/
+.packages
+build/
+pubspec.lock
+*.iml
+
+# Android
+android/
+.gradle/
+
+# iOS
+ios/
+
+# IDEs
+.idea/
+.vscode/
+*.iml
+
+# macOS
+.DS_Store
+
+# Planning & personal notes (not for git)
+PLANNING.md
