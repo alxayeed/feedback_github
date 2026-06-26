@@ -1,7 +1,7 @@
 import '../backend/feedback_backend.dart';
 import 'feedback_category.dart';
 
-/// Top-level configuration for the `flutter_github_feedback` package.
+/// Top-level configuration for the `feedback_github` package.
 ///
 /// Pass this to the [GithubFeedback] root widget:
 /// ```dart

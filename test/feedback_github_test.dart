@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter_github_feedback/flutter_github_feedback.dart';
+import 'package:feedback_github/feedback_github.dart';
 
 void main() {
   test('library loads', () {

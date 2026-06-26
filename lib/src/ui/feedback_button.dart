@@ -48,7 +48,7 @@ class FeedbackButton extends StatelessWidget {
 
     return FloatingActionButton.extended(
       // Explicit heroTag prevents Hero conflicts when consumers also have FABs.
-      heroTag: 'flutter_github_feedback_fab',
+      heroTag: 'feedback_github_fab',
       onPressed: () => _showFeedback(context),
       icon: icon,
       label: label,

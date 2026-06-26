@@ -1,10 +1,13 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:feedback_github/feedback_github.dart';
 
-/// Entry point for the flutter_github_feedback example app.
-///
-/// At this stage the package barrel is empty — the real integration
-/// (`GithubFeedback` wrapper + `FeedbackButton`) is wired up in the
-/// CHORE: wire up barrel exports commit once all widgets exist.
+/// Replace these with your real values before running.
+/// Never commit real tokens — use --dart-define or a .env loader.
+const _kToken = String.fromEnvironment('GH_TOKEN', defaultValue: 'YOUR_TOKEN');
+const _kOwner = String.fromEnvironment('GH_OWNER', defaultValue: 'your-org');
+const _kRepo = String.fromEnvironment('GH_REPO', defaultValue: 'your-repo');
+
 void main() {
   runApp(const ExampleApp());
 }
@@ -14,17 +17,36 @@ class ExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'flutter_github_feedback — Example',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorSchemeSeed: Colors.indigo,
-        useMaterial3: true,
+    return GithubFeedback(
+      config: FeedbackConfig(
+        // enabled: kDebugMode — set to false to hide the button in production.
+        enabled: kDebugMode,
+        backend: GitHubFeedbackBackend(
+          token: _kToken,
+          repoOwner: _kOwner,
+          repoName: _kRepo,
+          branch: 'feedback',
+        ),
+        // Optionally override categories:
+        // categories: [
+        //   FeedbackCategory(label: 'Crash', emoji: '💥'),
+        //   FeedbackCategory(label: 'Wrong data', emoji: '📊'),
+        // ],
       ),
-      home: const HomePage(),
+      child: MaterialApp(
+        title: 'feedback_github — Example',
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          colorSchemeSeed: Colors.indigo,
+          useMaterial3: true,
+        ),
+        home: const HomePage(),
+      ),
     );
   }
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -35,80 +57,54 @@ class HomePage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('flutter_github_feedback'),
+        title: const Text('feedback_github'),
         centerTitle: true,
       ),
+      // ── Drop FeedbackButton anywhere in your Scaffold ──────────────────
+      floatingActionButton: const FeedbackButton(),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 32),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.feedback_outlined, size: 80, color: Colors.indigo),
+              const Icon(
+                Icons.mark_chat_read_outlined,
+                size: 80,
+                color: Colors.indigo,
+              ),
               const SizedBox(height: 24),
               Text(
-                'Example App',
-                style: textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
+                'Feedback Demo',
+                style: textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 12),
               Text(
-                'The feedback button will appear here once all '
-                'package widgets are implemented.\n\n'
-                'Follow the commit plan in PLANNING.md.',
-                style: textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
+                'Tap the "Feedback" button below.\n'
+                'Draw on the screenshot, pick a category,\n'
+                'and submit — a GitHub Issue will be created.',
+                style: textTheme.bodyMedium?.copyWith(
+                  color: Colors.grey[600],
+                  height: 1.6,
+                ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 40),
-              _StatusTile(
-                icon: Icons.check_circle,
-                color: Colors.green,
-                label: 'Commit 1 — scaffold done',
+              _InfoCard(
+                icon: Icons.token_outlined,
+                title: 'Token',
+                value: _kToken == 'YOUR_TOKEN'
+                    ? 'Not configured (placeholder)'
+                    : '••••••••${_kToken.substring(_kToken.length - 4)}',
               ),
-              _StatusTile(
-                icon: Icons.check_circle,
-                color: Colors.green,
-                label: 'Commit 2 — example app done',
-              ),
-              _StatusTile(
-                icon: Icons.radio_button_unchecked,
-                color: Colors.grey,
-                label: 'Commit 3 — config models',
-              ),
-              _StatusTile(
-                icon: Icons.radio_button_unchecked,
-                color: Colors.grey,
-                label: 'Commit 4 — backend + GitHub impl',
-              ),
-              _StatusTile(
-                icon: Icons.radio_button_unchecked,
-                color: Colors.grey,
-                label: 'Commit 5 — state management',
-              ),
-              _StatusTile(
-                icon: Icons.radio_button_unchecked,
-                color: Colors.grey,
-                label: 'Commit 6 — feedback sheet UI',
-              ),
-              _StatusTile(
-                icon: Icons.radio_button_unchecked,
-                color: Colors.grey,
-                label: 'Commit 7 — feedback button widget',
-              ),
-              _StatusTile(
-                icon: Icons.radio_button_unchecked,
-                color: Colors.grey,
-                label: 'Commit 8 — GithubFeedback root widget',
-              ),
-              _StatusTile(
-                icon: Icons.radio_button_unchecked,
-                color: Colors.grey,
-                label: 'Commit 9 — wire up barrel + example',
-              ),
-              _StatusTile(
-                icon: Icons.radio_button_unchecked,
-                color: Colors.grey,
-                label: 'Commit 10 — complete README',
+              const SizedBox(height: 8),
+              _InfoCard(
+                icon: Icons.folder_outlined,
+                title: 'Repo',
+                value: '$_kOwner / $_kRepo',
               ),
             ],
           ),
@@ -118,26 +114,52 @@ class HomePage extends StatelessWidget {
   }
 }
 
-class _StatusTile extends StatelessWidget {
-  const _StatusTile({
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _InfoCard extends StatelessWidget {
+  const _InfoCard({
     required this.icon,
-    required this.color,
-    required this.label,
+    required this.title,
+    required this.value,
   });
 
   final IconData icon;
-  final Color color;
-  final String label;
+  final String title;
+  final String value;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+    final cs = Theme.of(context).colorScheme;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: cs.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: cs.outlineVariant),
+      ),
       child: Row(
         children: [
-          Icon(icon, color: color, size: 20),
-          const SizedBox(width: 10),
-          Text(label, style: Theme.of(context).textTheme.bodyMedium),
+          Icon(icon, size: 20, color: cs.primary),
+          const SizedBox(width: 12),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: cs.onSurfaceVariant,
+                    ),
+              ),
+              Text(
+                value,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w500,
+                    ),
+              ),
+            ],
+          ),
         ],
       ),
     );

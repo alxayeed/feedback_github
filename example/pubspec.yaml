@@ -1,5 +1,5 @@
-name: flutter_github_feedback_example
-description: Demonstrates flutter_github_feedback package.
+name: feedback_github_example
+description: Demonstrates feedback_github package.
 publish_to: none
 version: 1.0.0+1
 
@@ -10,7 +10,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  flutter_github_feedback:
+  feedback_github:
     path: ../
 
 dev_dependencies:

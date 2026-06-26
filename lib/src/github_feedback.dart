@@ -6,7 +6,7 @@ import 'state/feedback_notifier.dart';
 import 'state/feedback_scope.dart';
 import 'ui/custom_feedback_sheet.dart';
 
-/// Root widget that activates the `flutter_github_feedback` package.
+/// Root widget that activates the `feedback_github` package.
 ///
 /// Wrap your [MaterialApp] (or the topmost widget in your tree) with this:
 ///
