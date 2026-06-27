@@ -1,4 +1,7 @@
+import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 
 import '../config/feedback_category.dart';
 import '../config/feedback_config.dart';
@@ -12,6 +15,9 @@ class FeedbackNotifier extends ChangeNotifier {
   /// The resolved [FeedbackConfig] provided by [GithubFeedback].
   final FeedbackConfig config;
 
+  /// GlobalKey used to find the RepaintBoundary for screenshotting.
+  final GlobalKey repaintBoundaryKey = GlobalKey();
+
   // ---------------------------------------------------------------------------
   // State fields
   // ---------------------------------------------------------------------------
@@ -20,6 +26,7 @@ class FeedbackNotifier extends ChangeNotifier {
   String? _error;
   FeedbackCategory? _selectedCategory;
   String _text = '';
+  Uint8List? _screenshotBytes;
 
   // ---------------------------------------------------------------------------
   // Getters
@@ -36,6 +43,9 @@ class FeedbackNotifier extends ChangeNotifier {
 
   /// The current free-text feedback entered by the user.
   String get text => _text;
+
+  /// The screenshot bytes captured when the feedback flow is initiated.
+  Uint8List? get screenshotBytes => _screenshotBytes;
 
   /// Whether all required fields are filled and submission is not in progress.
   bool get canSubmit =>
@@ -61,12 +71,28 @@ class FeedbackNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Captures a screenshot of the app widget tree.
+  Future<void> captureScreenshot() async {
+    try {
+      final boundary = repaintBoundaryKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
+      if (boundary != null) {
+        final image = await boundary.toImage(pixelRatio: 3.0);
+        final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+        _screenshotBytes = byteData?.buffer.asUint8List();
+        notifyListeners();
+      }
+    } catch (e, st) {
+      debugPrint('[FeedbackNotifier] captureScreenshot error: $e\n$st');
+    }
+  }
+
   /// Resets all fields back to their initial values.
   void reset() {
     _isSubmitting = false;
     _error = null;
     _selectedCategory = null;
     _text = '';
+    _screenshotBytes = null;
     notifyListeners();
   }
 

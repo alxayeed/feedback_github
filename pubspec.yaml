@@ -1,6 +1,6 @@
 name: feedback_github
 description: A reusable Flutter package that sends in-app feedback (bug reports & suggestions) directly to GitHub Issues with screenshot capture.
-version: 0.0.1
+version: 0.0.2
 
 environment:
   sdk: ^3.12.0
@@ -9,7 +9,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  feedback: ^3.1.0
+  flutter_localizations:
+    sdk: flutter
   http: ^1.2.0
 
 dev_dependencies:

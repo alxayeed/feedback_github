@@ -1,8 +1,17 @@
-import 'package:feedback/feedback.dart';
+import 'package:feedback_github/src/feedback/feedback.dart';
 import 'package:flutter/material.dart';
 
 import '../config/feedback_category.dart';
 import '../state/feedback_scope.dart';
+
+/// The visual variant of the [FeedbackButton].
+enum FeedbackButtonVariant {
+  /// A small button showing only the icon.
+  small,
+
+  /// A larger button showing the icon and text label.
+  big,
+}
 
 /// A pre-built [FloatingActionButton] that launches the feedback flow.
 ///
@@ -23,6 +32,7 @@ import '../state/feedback_scope.dart';
 /// **Customisation** — swap the icon or label as needed:
 /// ```dart
 /// FeedbackButton(
+///   variant: FeedbackButtonVariant.big,
 ///   icon:  Icon(Icons.bug_report_outlined),
 ///   label: Text('Report a bug'),
 /// )
@@ -32,13 +42,18 @@ class FeedbackButton extends StatelessWidget {
     super.key,
     this.icon = const Icon(Icons.feedback_outlined),
     this.label = const Text('Feedback'),
+    this.variant = FeedbackButtonVariant.small,
   });
 
-  /// Icon shown on the extended FAB. Defaults to `Icons.feedback_outlined`.
+  /// Icon shown on the FAB. Defaults to `Icons.feedback_outlined`.
   final Widget icon;
 
-  /// Label shown on the extended FAB. Defaults to `"Feedback"`.
+  /// Label shown on the extended FAB (only in [FeedbackButtonVariant.big] variant).
+  /// Defaults to `"Feedback"`.
   final Widget label;
+
+  /// The visual variant of the button. Defaults to [FeedbackButtonVariant.small].
+  final FeedbackButtonVariant variant;
 
   @override
   Widget build(BuildContext context) {
@@ -49,24 +64,38 @@ class FeedbackButton extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    return FloatingActionButton.extended(
-      // Explicit heroTag prevents Hero conflicts when consumers also have FABs.
-      heroTag: 'feedback_github_fab',
-      onPressed: () => _showFeedback(context),
-      icon: icon,
-      label: label,
-    );
+    if (variant == FeedbackButtonVariant.big) {
+      return FloatingActionButton.extended(
+        // Explicit heroTag prevents Hero conflicts when consumers also have FABs.
+        heroTag: 'feedback_github_fab',
+        onPressed: () => _showFeedback(context),
+        icon: icon,
+        label: label,
+      );
+    } else {
+      return FloatingActionButton(
+        // Explicit heroTag prevents Hero conflicts when consumers also have FABs.
+        heroTag: 'feedback_github_fab',
+        onPressed: () => _showFeedback(context),
+        child: icon,
+      );
+    }
   }
 
   // ---------------------------------------------------------------------------
   // Private helpers
   // ---------------------------------------------------------------------------
 
-  void _showFeedback(BuildContext context) {
+  void _showFeedback(BuildContext context) async {
     // Use read() inside a callback — no rebuild subscription needed.
-    final config = FeedbackScope.read(context)?.config;
+    final notifier = FeedbackScope.read(context);
+    final config = notifier?.config;
     if (config == null) return;
 
+    // Capture screenshot of the app widget tree before showing the drawing overlay
+    await notifier?.captureScreenshot();
+
+    // ignore: use_build_context_synchronously
     BetterFeedback.of(context).show((UserFeedback feedback) async {
       // Reconstruct the enum value from its name stored by the sheet.
       final categoryName = feedback.extra?['category'] as String?;

@@ -1,5 +1,5 @@
-import 'package:feedback/feedback.dart';
-import 'package:flutter/widgets.dart';
+import 'package:feedback_github/src/feedback/feedback.dart';
+import 'package:flutter/material.dart';
 
 import 'config/feedback_config.dart';
 import 'state/feedback_notifier.dart';
@@ -81,7 +81,20 @@ class _GithubFeedbackState extends State<GithubFeedback> {
       notifier: _notifier,
       child: BetterFeedback(
         feedbackBuilder: buildCustomFeedbackSheet(widget.config),
-        child: widget.child,
+        theme: FeedbackThemeData.light(
+          sheetIsDraggable: true,
+        ).copyWith(
+          feedbackSheetHeight: 0.35,
+        ),
+        darkTheme: FeedbackThemeData.dark(
+          sheetIsDraggable: true,
+        ).copyWith(
+          feedbackSheetHeight: 0.35,
+        ),
+        child: RepaintBoundary(
+          key: _notifier.repaintBoundaryKey,
+          child: widget.child,
+        ),
       ),
     );
   }
