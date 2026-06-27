@@ -32,10 +32,6 @@ class _DraggableFeedbackButtonState extends State<DraggableFeedbackButton> {
     return AnimatedBuilder(
       animation: controller,
       builder: (context, _) {
-        if (controller.isVisible) {
-          return const SizedBox.shrink();
-        }
-
         final mediaQuery = MediaQuery.of(context);
         final screenSize = mediaQuery.size;
         final topPadding = mediaQuery.padding.top;
@@ -55,17 +51,20 @@ class _DraggableFeedbackButtonState extends State<DraggableFeedbackButton> {
         return Positioned(
           left: targetX,
           top: targetY,
-          child: GestureDetector(
-            behavior: HitTestBehavior.deferToChild,
-            onPanUpdate: (details) {
-              setState(() {
-                _offset = Offset(
-                  (targetX + details.delta.dx).clamp(minX, maxX),
-                  (targetY + details.delta.dy).clamp(minY, maxY),
-                );
-              });
-            },
-            child: const FeedbackButton(),
+          child: Offstage(
+            offstage: controller.isVisible,
+            child: GestureDetector(
+              behavior: HitTestBehavior.deferToChild,
+              onPanUpdate: (details) {
+                setState(() {
+                  _offset = Offset(
+                    (targetX + details.delta.dx).clamp(minX, maxX),
+                    (targetY + details.delta.dy).clamp(minY, maxY),
+                  );
+                });
+              },
+              child: const FeedbackButton(),
+            ),
           ),
         );
       },

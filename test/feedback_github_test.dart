@@ -168,27 +168,226 @@ void main() {
       ),
     );
 
-    // Tap the FAB to launch feedback
+    await tester.runAsync(() async {
+      // Tap the FAB to launch feedback
+      await tester.tap(find.byType(FloatingActionButton));
+      await tester.pump(); // Start the screenshot process
+      await Future.delayed(const Duration(milliseconds: 200));
+      await tester.pump(); // Finish and show BetterFeedback
+      await tester.pumpAndSettle();
+
+      // Now, check if the custom feedback sheet is visible
+      expect(find.byKey(const Key('feedback_bottom_sheet')), findsOneWidget);
+
+      // Initially, it is not fullscreen, so the screenshot preview Image shouldn't be visible
+      expect(find.byType(Image), findsNothing);
+
+      // Let's simulate dragging the bottom sheet up to make it fullscreen
+      await tester.dragFrom(const Offset(400, 550), const Offset(0, -500));
+      await tester.pumpAndSettle();
+
+      // Now it should be fullscreen, check if the top screenshot preview Image is displayed!
+      expect(find.byType(Image), findsOneWidget);
+    });
+  });
+
+  testWidgets('Snackbar shows on successful submission', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      GithubFeedback(
+        config: FeedbackConfig(
+          enabled: true,
+          backend: DummyBackend(),
+        ),
+        child: const MaterialApp(
+          home: Scaffold(
+            body: Text('My App Body'),
+          ),
+        ),
+      ),
+    );
+
+    // Open feedback sheet (requires runAsync for screenshot)
     await tester.runAsync(() async {
       await tester.tap(find.byType(FloatingActionButton));
-      await tester.pump(); // Start the screenshot process and endOfFrame wait
-      await Future.delayed(const Duration(milliseconds: 100));
-      await tester.pump(); // Finish endOfFrame and show BetterFeedback
-      await tester.pumpAndSettle(); // Settle all animations
+      await tester.pump();
+      await Future.delayed(const Duration(milliseconds: 200));
+      await tester.pump();
     });
+    await tester.pumpAndSettle();
 
-    // Now, check if the custom feedback sheet is visible
-    expect(find.byKey(const Key('feedback_bottom_sheet')), findsOneWidget);
+    // Fill feedback and submit
+    await tester.tap(find.textContaining('Bug Report'));
+    await tester.pumpAndSettle();
 
-    // Initially, it is not fullscreen, so the screenshot preview Image shouldn't be visible
-    expect(find.byType(Image), findsNothing);
+    await tester.enterText(find.byType(TextField), 'Testing success feedback');
+    await tester.pumpAndSettle();
 
-    // Let's simulate dragging the bottom sheet up to make it fullscreen
-    // Drag it all the way up from the bottom center of the screen
+    // Tap send
+    await tester.runAsync(() async {
+      await tester.tap(find.text('Send'));
+      await tester.pump(); // Start send feedback process
+      await Future.delayed(const Duration(milliseconds: 500));
+      await tester.pump(); // complete screenshot and call submission
+    });
+    
+    // Advance fake time to let the snackbar entrance animation complete
+    await tester.pump(const Duration(seconds: 1));
+
+    // Expect snackbar with success message
+    expect(find.text('Feedback submitted successfully!'), findsOneWidget);
+  });
+
+  testWidgets('Snackbar shows error on failed submission', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      GithubFeedback(
+        config: FeedbackConfig(
+          enabled: true,
+          backend: MockFailureBackend(),
+        ),
+        child: const MaterialApp(
+          home: Scaffold(
+            body: Text('My App Body'),
+          ),
+        ),
+      ),
+    );
+
+    // Open feedback sheet (requires runAsync for screenshot)
+    await tester.runAsync(() async {
+      await tester.tap(find.byType(FloatingActionButton));
+      await tester.pump();
+      await Future.delayed(const Duration(milliseconds: 200));
+      await tester.pump();
+    });
+    await tester.pumpAndSettle();
+
+    // Fill feedback and submit
+    await tester.tap(find.textContaining('Bug Report'));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byType(TextField), 'Testing failure feedback');
+    await tester.pumpAndSettle();
+
+    // Tap send
+    await tester.runAsync(() async {
+      await tester.tap(find.text('Send'));
+      await tester.pump(); // Start send feedback process
+      await Future.delayed(const Duration(milliseconds: 500));
+      await tester.pump(); // complete screenshot and call submission
+    });
+    
+    // Advance fake time to let the snackbar entrance animation complete
+    await tester.pump(const Duration(seconds: 1));
+
+    // Expect snackbar with failure message
+    expect(find.textContaining('Failed to submit feedback:'), findsOneWidget);
+  });
+
+  testWidgets('Close button in fullscreen mode dismisses feedback sheet', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      GithubFeedback(
+        config: FeedbackConfig(
+          enabled: true,
+          backend: DummyBackend(),
+        ),
+        child: const MaterialApp(
+          home: Scaffold(
+            body: Text('My App Body'),
+          ),
+        ),
+      ),
+    );
+
+    // Open feedback sheet
+    await tester.runAsync(() async {
+      await tester.tap(find.byType(FloatingActionButton));
+      await tester.pump();
+      await Future.delayed(const Duration(milliseconds: 200));
+      await tester.pump();
+    });
+    await tester.pumpAndSettle();
+
+    // Finder for the close button inside the bottom sheet
+    final closeButtonFinder = find.descendant(
+      of: find.byKey(const Key('feedback_bottom_sheet')),
+      matching: find.byIcon(Icons.close),
+    );
+
+    // Verify it is initially not fullscreen, so no close button is visible in header
+    expect(closeButtonFinder, findsNothing);
+
+    // Drag the bottom sheet up to make it fullscreen
     await tester.dragFrom(const Offset(400, 550), const Offset(0, -500));
     await tester.pumpAndSettle();
 
-    // Now it should be fullscreen, check if the top screenshot preview Image is displayed!
-    expect(find.byType(Image), findsOneWidget);
+    // Now it should be fullscreen, check that the close button is displayed
+    expect(closeButtonFinder, findsOneWidget);
+
+    // Tap the close button
+    await tester.tap(closeButtonFinder);
+    await tester.pumpAndSettle();
+
+    // The feedback sheet should now be hidden
+    expect(find.byKey(const Key('feedback_bottom_sheet')), findsNothing);
+  });
+
+  testWidgets('FeedbackTheme updates dynamically when platform brightness changes', (WidgetTester tester) async {
+    tester.view.platformDispatcher.platformBrightnessTestValue = Brightness.light;
+    addTearDown(() {
+      tester.view.platformDispatcher.clearPlatformBrightnessTestValue();
+    });
+
+    await tester.pumpWidget(
+      GithubFeedback(
+        config: FeedbackConfig(
+          enabled: true,
+          backend: DummyBackend(),
+        ),
+        child: const MaterialApp(
+          home: Scaffold(
+            body: Text('My App Body'),
+          ),
+        ),
+      ),
+    );
+
+    // Open feedback sheet
+    await tester.runAsync(() async {
+      await tester.tap(find.byType(FloatingActionButton));
+      await tester.pump();
+      await Future.delayed(const Duration(milliseconds: 200));
+      await tester.pump();
+    });
+    await tester.pumpAndSettle();
+
+    // Finder for the Material widget inside the bottom sheet
+    final sheetMaterialFinder = find.descendant(
+      of: find.byKey(const Key('feedback_bottom_sheet')),
+      matching: find.byType(Material),
+    ).first;
+
+    // Verify background color is light grey (0xFFFAFAFA)
+    var material = tester.widget<Material>(sheetMaterialFinder);
+    expect(material.color, const Color(0xFFFAFAFA));
+
+    // Change system brightness to dark
+    tester.view.platformDispatcher.platformBrightnessTestValue = Brightness.dark;
+    await tester.pumpAndSettle();
+
+    // Verify background color updates to dark grey (0xFF303030)
+    material = tester.widget<Material>(sheetMaterialFinder);
+    expect(material.color, const Color(0xFF303030));
   });
 }
+
+class MockFailureBackend implements FeedbackBackend {
+  @override
+  Future<void> submit({
+    required FeedbackCategory category,
+    required String text,
+    Uint8List? screenshot,
+  }) async {
+    throw Exception('API Error');
+  }
+}
+

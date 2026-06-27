@@ -116,6 +116,13 @@ class _CustomFeedbackSheetState extends State<_CustomFeedbackSheet> {
           _error = e.toString();
           _submitting = false;
         });
+        if (_sheetController != null && _sheetController!.isAttached) {
+          _sheetController!.animateTo(
+            1.0,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeOut,
+          );
+        }
       }
     }
   }
@@ -129,7 +136,7 @@ class _CustomFeedbackSheetState extends State<_CustomFeedbackSheet> {
     final screenshotBytes = notifier?.screenshotBytes;
 
     return Material(
-      color: Colors.white,
+      color: theme.cardColor,
       borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
       child: ListView(
         controller: widget.scrollController,
@@ -152,33 +159,31 @@ class _CustomFeedbackSheetState extends State<_CustomFeedbackSheet> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Send Feedback',
-                      style: (_isFullscreen
-                          ? theme.textTheme.titleLarge
-                          : theme.textTheme.titleMedium)
-                          ?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    if (_isFullscreen) ...[
-                      const SizedBox(height: 4),
-                      Text(
-                        'Draw on the screenshot, pick a category, and describe the issue.',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: cs.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ],
+              Text(
+                'Send Feedback',
+                style: (_isFullscreen
+                    ? theme.textTheme.titleLarge
+                    : theme.textTheme.titleMedium)
+                    ?.copyWith(
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-              if (!_isFullscreen) ...[
-                const SizedBox(width: 12),
+              if (_isFullscreen) ...[
+                IconButton(
+                  icon: const Icon(Icons.close, size: 18),
+                  style: IconButton.styleFrom(
+                    backgroundColor: cs.error,
+                    foregroundColor: cs.onError,
+                    shape: const CircleBorder(),
+                    padding: EdgeInsets.zero,
+                    minimumSize: const Size(32, 32),
+                    fixedSize: const Size(32, 32),
+                  ),
+                  onPressed: () {
+                    BetterFeedback.of(context).hide();
+                  },
+                ),
+              ] else ...[
                 _submitting
                     ? const SizedBox(
                   width: 22,
@@ -203,6 +208,15 @@ class _CustomFeedbackSheetState extends State<_CustomFeedbackSheet> {
               ],
             ],
           ),
+          if (_isFullscreen) ...[
+            const SizedBox(height: 6),
+            Text(
+              'Draw on the screenshot, pick a category, and describe the issue.',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: cs.onSurfaceVariant,
+              ),
+            ),
+          ],
           SizedBox(height: _isFullscreen ? 20 : 10),
 
           // ── Screenshot Preview (Only in Fullscreen - placed right after header) ───────────────────

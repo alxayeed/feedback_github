@@ -82,6 +82,7 @@ class _GithubFeedbackState extends State<GithubFeedback> {
       notifier: _notifier,
       child: BetterFeedback(
         feedbackBuilder: buildCustomFeedbackSheet(widget.config),
+        themeMode: widget.config.themeMode,
         theme: FeedbackThemeData.light(
           sheetIsDraggable: true,
         ).copyWith(

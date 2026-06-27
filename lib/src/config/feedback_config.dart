@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import '../backend/feedback_backend.dart';
 import 'feedback_category.dart';
 
@@ -23,6 +24,7 @@ class FeedbackConfig {
     this.enabled = true,
     this.categories = FeedbackCategory.values,
     this.showFloatingButton = true,
+    this.themeMode,
   });
 
   /// The backend responsible for submitting feedback.
@@ -51,4 +53,9 @@ class FeedbackConfig {
   /// Defaults to `true`. Set to `false` if you want to manually place
   /// the [FeedbackButton] in your layouts.
   final bool showFloatingButton;
+
+  /// The theme mode used to style the feedback UI (ThemeMode.system, ThemeMode.light, or ThemeMode.dark).
+  ///
+  /// Defaults to [ThemeMode.system].
+  final ThemeMode? themeMode;
 }

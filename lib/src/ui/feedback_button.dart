@@ -2,6 +2,7 @@ import 'package:feedback_github/src/feedback/feedback.dart';
 import 'package:flutter/material.dart';
 
 import '../config/feedback_category.dart';
+import '../state/feedback_notifier.dart';
 import '../state/feedback_scope.dart';
 
 /// The visual variant of the [FeedbackButton].
@@ -104,11 +105,71 @@ class FeedbackButton extends StatelessWidget {
         orElse: () => config.categories.first,
       );
 
-      await config.backend.submit(
-        category: category,
-        text: feedback.text,
-        screenshot: feedback.screenshot,
-      );
+      try {
+        await config.backend.submit(
+          category: category,
+          text: feedback.text,
+          screenshot: feedback.screenshot,
+        );
+        final messenger = _findScaffoldMessenger(context, notifier);
+        if (messenger != null) {
+          messenger.showSnackBar(
+            const SnackBar(
+              content: Text('Feedback submitted successfully!'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      } catch (e, stackTrace) {
+        debugPrint('Feedback submission error: $e');
+        debugPrint(stackTrace.toString());
+        final messenger = _findScaffoldMessenger(context, notifier);
+        if (messenger != null) {
+          messenger.showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  Expanded(
+                    child: Text('Failed to submit feedback: $e'),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close, color: Colors.white, size: 18),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                    onPressed: () {
+                      messenger.hideCurrentSnackBar();
+                    },
+                  ),
+                ],
+              ),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+        rethrow;
+      }
     });
+  }
+
+  ScaffoldMessengerState? _findScaffoldMessenger(BuildContext context, FeedbackNotifier? notifier) {
+    try {
+      return ScaffoldMessenger.of(context);
+    } catch (_) {}
+
+    final repaintContext = notifier?.repaintBoundaryKey.currentContext;
+    if (repaintContext is Element) {
+      ScaffoldMessengerState? state;
+      void visitor(Element element) {
+        if (state != null) return;
+        if (element is StatefulElement && element.state is ScaffoldMessengerState) {
+          state = element.state as ScaffoldMessengerState;
+          return;
+        }
+        element.visitChildren(visitor);
+      }
+      repaintContext.visitChildren(visitor);
+      return state;
+    }
+    return null;
   }
 }
