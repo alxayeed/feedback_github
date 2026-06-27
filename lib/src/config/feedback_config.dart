@@ -22,6 +22,7 @@ class FeedbackConfig {
     required this.backend,
     this.enabled = true,
     this.categories = FeedbackCategory.values,
+    this.showFloatingButton = true,
   });
 
   /// The backend responsible for submitting feedback.
@@ -44,4 +45,10 @@ class FeedbackConfig {
   /// categories: [FeedbackCategory.bug, FeedbackCategory.enhancement]
   /// ```
   final List<FeedbackCategory> categories;
+
+  /// Whether to show the draggable floating feedback button automatically on all screens.
+  ///
+  /// Defaults to `true`. Set to `false` if you want to manually place
+  /// the [FeedbackButton] in your layouts.
+  final bool showFloatingButton;
 }

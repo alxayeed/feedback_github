@@ -5,6 +5,7 @@ import 'config/feedback_config.dart';
 import 'state/feedback_notifier.dart';
 import 'state/feedback_scope.dart';
 import 'ui/custom_feedback_sheet.dart';
+import 'ui/draggable_feedback_button.dart';
 
 /// Root widget that activates the `feedback_github` package.
 ///
@@ -93,7 +94,13 @@ class _GithubFeedbackState extends State<GithubFeedback> {
         ),
         child: RepaintBoundary(
           key: _notifier.repaintBoundaryKey,
-          child: widget.child,
+          child: Stack(
+            children: [
+              widget.child,
+              if (widget.config.showFloatingButton)
+                const DraggableFeedbackButton(),
+            ],
+          ),
         ),
       ),
     );

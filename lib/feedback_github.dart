@@ -19,3 +19,4 @@ export 'src/state/feedback_scope.dart';
 
 // ── UI widgets ───────────────────────────────────────────────────────────────
 export 'src/ui/feedback_button.dart';
+export 'src/ui/draggable_feedback_button.dart';

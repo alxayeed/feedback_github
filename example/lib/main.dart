@@ -57,8 +57,6 @@ class HomePage extends StatelessWidget {
         title: const Text('feedback_github'),
         centerTitle: true,
       ),
-      // ── Drop FeedbackButton anywhere in your Scaffold ──────────────────
-      floatingActionButton: const FeedbackButton(),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 32),
@@ -80,7 +78,8 @@ class HomePage extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               Text(
-                'Tap the "Feedback" button below.\n'
+                'Tap the floating "Feedback" button on the screen.\n'
+                'You can drag the button to reposition it.\n'
                 'Draw on the screenshot, pick a category,\n'
                 'and submit — a GitHub Issue will be created.',
                 style: textTheme.bodyMedium?.copyWith(

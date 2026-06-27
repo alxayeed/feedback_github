@@ -76,6 +76,9 @@ class FeedbackNotifier extends ChangeNotifier {
     try {
       final boundary = repaintBoundaryKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
       if (boundary != null) {
+        if (boundary.debugNeedsPaint) {
+          await WidgetsBinding.instance.endOfFrame;
+        }
         final image = await boundary.toImage(pixelRatio: 3.0);
         final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
         _screenshotBytes = byteData?.buffer.asUint8List();

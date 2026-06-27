@@ -205,6 +205,22 @@ class _CustomFeedbackSheetState extends State<_CustomFeedbackSheet> {
           ),
           SizedBox(height: _isFullscreen ? 20 : 10),
 
+          // ── Screenshot Preview (Only in Fullscreen - placed right after header) ───────────────────
+          if (_isFullscreen && screenshotBytes != null) ...[
+            SizedBox(
+              height: 250,
+              width: double.infinity,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.memory(
+                  screenshotBytes,
+                  fit: BoxFit.contain,
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+          ],
+
           // ── Category chips ─────────────────────────────────────────────
           Text(
             'Category',
@@ -332,33 +348,6 @@ class _CustomFeedbackSheetState extends State<_CustomFeedbackSheet> {
             onChanged: (_) => setState(() {}),
           ),
           SizedBox(height: _isFullscreen ? 12 : 6),
-
-          // ── Screenshot Preview (Only in Fullscreen) ───────────────────
-          if (_isFullscreen && screenshotBytes != null) ...[
-            Text(
-              'Screenshot to attach',
-              style: theme.textTheme.labelLarge?.copyWith(
-                color: cs.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Container(
-              height: 120,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                border: Border.all(color: cs.outlineVariant),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(11),
-                child: Image.memory(
-                  screenshotBytes,
-                  fit: BoxFit.contain,
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
-          ],
 
           // ── Error banner ───────────────────────────────────────────────
           if (_error != null) ...[
