@@ -27,8 +27,10 @@ class ExampleApp extends StatelessWidget {
           repoName: _kRepo,
           branch: 'feedback',
         ),
-        // Optionally override categories with enum values:
-        // categories: [FeedbackCategory.bug, FeedbackCategory.enhancement],
+        // Configure global button styling
+        icon: const Icon(Icons.bug_report, color: Colors.yellow),
+        backgroundColor: Colors.purple,
+        foregroundColor: Colors.yellow,
       ),
       child: MaterialApp(
         title: 'feedback_github — Example',
@@ -88,7 +90,19 @@ class HomePage extends StatelessWidget {
                 ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 40),
+              const SizedBox(height: 32),
+              ElevatedButton.icon(
+                icon: const Icon(Icons.navigate_next),
+                label: const Text('Go to Custom Feedback Page'),
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => const CustomFeedbackPage(),
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 24),
               _InfoCard(
                 icon: Icons.token_outlined,
                 title: 'Token',
@@ -101,6 +115,57 @@ class HomePage extends StatelessWidget {
                 icon: Icons.folder_outlined,
                 title: 'Repo',
                 value: '$_kOwner / $_kRepo',
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+
+class CustomFeedbackPage extends StatelessWidget {
+  const CustomFeedbackPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Custom Feedback Page'),
+      ),
+      floatingActionButton: const FeedbackButton(
+        variant: FeedbackButtonVariant.big,
+        icon: Icon(Icons.support_agent),
+        label: Text('Get Support'),
+        backgroundColor: Colors.green,
+        foregroundColor: Colors.white,
+      ),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(32.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(
+                Icons.support_agent,
+                size: 80,
+                color: Colors.green,
+              ),
+              const SizedBox(height: 24),
+              Text(
+                'Custom Feedback Screen',
+                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+              ),
+              const SizedBox(height: 12),
+              const Text(
+                'On this screen, the default purple/yellow draggable feedback button is hidden. '
+                'Instead, you only see the explicit green "Get Support" button in the scaffold\'s FloatingActionButton slot.\n\n'
+                'Go back to the Home page, and the draggable button will reappear.',
+                textAlign: TextAlign.center,
               ),
             ],
           ),

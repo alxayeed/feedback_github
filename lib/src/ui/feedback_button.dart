@@ -161,6 +161,7 @@ class _FeedbackButtonState extends State<FeedbackButton> {
           text: feedback.text,
           screenshot: feedback.screenshot,
         );
+        if (!context.mounted) return;
         final messenger = _findScaffoldMessenger(context, notifier);
         if (messenger != null) {
           messenger.showSnackBar(
@@ -173,6 +174,7 @@ class _FeedbackButtonState extends State<FeedbackButton> {
       } catch (e, stackTrace) {
         debugPrint('Feedback submission error: $e');
         debugPrint(stackTrace.toString());
+        if (!context.mounted) return;
         final messenger = _findScaffoldMessenger(context, notifier);
         if (messenger != null) {
           messenger.showSnackBar(
