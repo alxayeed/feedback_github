@@ -42,10 +42,12 @@ class FeedbackButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Use of() so the button reacts if enabled changes at runtime.
+    // If GithubFeedback is disabled, notifier will be null because the scope is not in the tree.
     final notifier = FeedbackScope.of(context);
 
-    if (!notifier.config.enabled) return const SizedBox.shrink();
+    if (notifier == null || !notifier.config.enabled) {
+      return const SizedBox.shrink();
+    }
 
     return FloatingActionButton.extended(
       // Explicit heroTag prevents Hero conflicts when consumers also have FABs.
@@ -62,7 +64,8 @@ class FeedbackButton extends StatelessWidget {
 
   void _showFeedback(BuildContext context) {
     // Use read() inside a callback — no rebuild subscription needed.
-    final config = FeedbackScope.read(context).config;
+    final config = FeedbackScope.read(context)?.config;
+    if (config == null) return;
 
     BetterFeedback.of(context).show((UserFeedback feedback) async {
       // Reconstruct the enum value from its name stored by the sheet.
