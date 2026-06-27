@@ -78,7 +78,8 @@ class _CustomFeedbackSheetState extends State<_CustomFeedbackSheet> {
       // and pass UserFeedback to the GithubFeedback widget's show() handler.
       await widget.onSubmit(
         _textController.text.trim(),
-        extras: {'category': _selected!.label},
+        // Store the enum name so FeedbackButton can reconstruct the value.
+        extras: {'category': _selected!.name},
       );
     } catch (e) {
       if (mounted) {
@@ -146,7 +147,7 @@ class _CustomFeedbackSheetState extends State<_CustomFeedbackSheet> {
             children: cats.map((cat) {
               final isSelected = _selected == cat;
               return ChoiceChip(
-                label: Text('${cat.emoji}  ${cat.label}'),
+                label: Text('${cat.emoji}  ${cat.displayLabel}'),
                 selected: isSelected,
                 onSelected: _submitting
                     ? null

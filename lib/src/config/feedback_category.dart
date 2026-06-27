@@ -1,39 +1,71 @@
-/// A category that a user can assign to their feedback submission.
-class FeedbackCategory {
-  const FeedbackCategory({
-    required this.label,
-    this.emoji = '📝',
-  });
+/// GitHub-mapped feedback categories.
+///
+/// Each value carries its own [emoji], [displayLabel], and [githubLabel] —
+/// no strings or emojis needed from the consumer.
+///
+/// ```dart
+/// // Use all categories (default)
+/// FeedbackConfig(categories: FeedbackCategory.values, ...)
+///
+/// // Or cherry-pick
+/// FeedbackConfig(
+///   categories: [FeedbackCategory.bug, FeedbackCategory.enhancement],
+///   ...
+/// )
+/// ```
+enum FeedbackCategory {
+  bug,
+  enhancement,
+  question,
+  performance,
+  uiUx,
+  documentation,
+  other;
 
-  /// Human-readable label shown in the UI.
-  final String label;
+  // ---------------------------------------------------------------------------
+  // Display
+  // ---------------------------------------------------------------------------
 
-  /// Optional emoji prefix shown alongside the label.
-  final String emoji;
+  /// Human-readable label shown in the feedback sheet chip.
+  String get displayLabel => switch (this) {
+        FeedbackCategory.bug           => 'Bug Report',
+        FeedbackCategory.enhancement   => 'Enhancement',
+        FeedbackCategory.question      => 'Question',
+        FeedbackCategory.performance   => 'Performance',
+        FeedbackCategory.uiUx          => 'UI / UX',
+        FeedbackCategory.documentation => 'Documentation',
+        FeedbackCategory.other         => 'Other',
+      };
 
-  /// Default set of categories shipped with the package.
+  /// Emoji prefix shown alongside [displayLabel] in the chip.
+  String get emoji => switch (this) {
+        FeedbackCategory.bug           => '🐛',
+        FeedbackCategory.enhancement   => '✨',
+        FeedbackCategory.question      => '❓',
+        FeedbackCategory.performance   => '⚡',
+        FeedbackCategory.uiUx          => '🎨',
+        FeedbackCategory.documentation => '📖',
+        FeedbackCategory.other         => '💬',
+      };
+
+  // ---------------------------------------------------------------------------
+  // GitHub
+  // ---------------------------------------------------------------------------
+
+  /// The label string applied to the created GitHub issue.
   ///
-  /// Consumers may replace this list via [FeedbackConfig.categories].
-  static const List<FeedbackCategory> defaults = [
-    FeedbackCategory(label: 'Bug Report', emoji: '🐛'),
-    FeedbackCategory(label: 'Feature Request', emoji: '✨'),
-    FeedbackCategory(label: 'UI / UX', emoji: '🎨'),
-    FeedbackCategory(label: 'Performance', emoji: '⚡'),
-    FeedbackCategory(label: 'Other', emoji: '💬'),
-  ];
-
-  /// Returns `"emoji label"`, e.g. `"🐛 Bug Report"`.
-  @override
-  String toString() => '$emoji $label';
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is FeedbackCategory &&
-          runtimeType == other.runtimeType &&
-          label == other.label &&
-          emoji == other.emoji;
-
-  @override
-  int get hashCode => label.hashCode ^ emoji.hashCode;
+  /// Maps to GitHub's built-in default labels where available:
+  /// `bug`, `enhancement`, `question`, `documentation`.
+  ///
+  /// Custom values (`performance`, `ui/ux`, `feedback`) are created
+  /// automatically on first use by the GitHub Issues API.
+  String get githubLabel => switch (this) {
+        FeedbackCategory.bug           => 'bug',
+        FeedbackCategory.enhancement   => 'enhancement',
+        FeedbackCategory.question      => 'question',
+        FeedbackCategory.performance   => 'performance',
+        FeedbackCategory.uiUx          => 'ui/ux',
+        FeedbackCategory.documentation => 'documentation',
+        FeedbackCategory.other         => 'feedback',
+      };
 }

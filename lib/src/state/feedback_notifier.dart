@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:flutter/foundation.dart';
 
 import '../config/feedback_category.dart';
@@ -91,7 +89,7 @@ class FeedbackNotifier extends ChangeNotifier {
 
     try {
       await config.backend.submit(
-        category: _selectedCategory!.label,
+        category: _selectedCategory!,
         text: _text.trim(),
         screenshot: screenshot,
       );

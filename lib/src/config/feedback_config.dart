@@ -21,7 +21,7 @@ class FeedbackConfig {
   const FeedbackConfig({
     required this.backend,
     this.enabled = true,
-    this.categories = FeedbackCategory.defaults,
+    this.categories = FeedbackCategory.values,
   });
 
   /// The backend responsible for submitting feedback.
@@ -38,7 +38,10 @@ class FeedbackConfig {
 
   /// The list of categories shown to the user in the feedback sheet.
   ///
-  /// Defaults to [FeedbackCategory.defaults]. Override to provide
-  /// domain-specific categories for your app.
+  /// Defaults to all [FeedbackCategory] values. Pass a subset to limit
+  /// the options shown to the user:
+  /// ```dart
+  /// categories: [FeedbackCategory.bug, FeedbackCategory.enhancement]
+  /// ```
   final List<FeedbackCategory> categories;
 }

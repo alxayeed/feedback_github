@@ -17,8 +17,9 @@ GitHub for Firestore, Slack, email, or any custom destination.
 - 📸 **Screenshot capture** — powered by `BetterFeedback`; users draw on the
   screen before submitting
 - 🐛 **GitHub Issues** — screenshot uploaded to your repo, issue created with
-  embedded image
-- 🗂 **Category chips** — configurable list (Bug Report, Feature Request, …)
+  embedded image and the correct GitHub label applied automatically
+- 🗂 **Enum-based categories** — no strings or emojis to supply; each
+  `FeedbackCategory` value knows its own label, emoji, and GitHub label
 - 🔌 **Backend-agnostic** — implement `FeedbackBackend` to send feedback
   anywhere
 - 🪶 **Zero-cost when disabled** — `enabled: false` renders your app as-is
@@ -29,14 +30,14 @@ GitHub for Firestore, Slack, email, or any custom destination.
 
 ## Installation
 
-This package is not yet on pub.dev. Add it via Git:
+Add via Git until the package is published to pub.dev:
 
 ```yaml
 dependencies:
   feedback_github:
     git:
       url: https://github.com/alxayeed/feedback_github
-      ref: v1.0.0
+      ref: 0.0.1
 ```
 
 Then run:
@@ -119,7 +120,7 @@ permissions:
 |-----------|------|---------|-------------|
 | `backend` | `FeedbackBackend` | required | Where to send feedback |
 | `enabled` | `bool` | `true` | Show/hide the feedback UI |
-| `categories` | `List<FeedbackCategory>` | `FeedbackCategory.defaults` | Category chips shown to the user |
+| `categories` | `List<FeedbackCategory>` | `FeedbackCategory.values` | Categories shown to the user |
 
 ### `GitHubFeedbackBackend`
 
@@ -131,35 +132,36 @@ permissions:
 | `branch` | `String` | `'main'` | Branch for screenshot uploads |
 | `screenshotDir` | `String` | `'feedback/screenshots'` | Directory for screenshot assets |
 
-### `FeedbackCategory`
+---
+
+## `FeedbackCategory` — enum
+
+No strings or emojis needed. Each enum value knows its own display label,
+emoji, and the exact GitHub label to apply to the created issue.
+
+| Value | Emoji | Display Label | GitHub Label |
+|-------|-------|--------------|--------------|
+| `FeedbackCategory.bug` | 🐛 | Bug Report | `bug` ✱ |
+| `FeedbackCategory.enhancement` | ✨ | Enhancement | `enhancement` ✱ |
+| `FeedbackCategory.question` | ❓ | Question | `question` ✱ |
+| `FeedbackCategory.performance` | ⚡ | Performance | `performance` |
+| `FeedbackCategory.uiUx` | 🎨 | UI / UX | `ui/ux` |
+| `FeedbackCategory.documentation` | 📖 | Documentation | `documentation` ✱ |
+| `FeedbackCategory.other` | 💬 | Other | `feedback` |
+
+> ✱ Maps to GitHub's built-in default labels. Custom labels are created
+> automatically on first use by the GitHub Issues API.
 
 ```dart
-// Use the built-in defaults
-FeedbackConfig(
-  categories: FeedbackCategory.defaults, // 🐛 Bug Report, ✨ Feature Request, …
-  ...
-)
+// Use all categories (default — no configuration needed)
+FeedbackConfig(backend: ...) // categories defaults to FeedbackCategory.values
 
-// Or provide your own
+// Cherry-pick specific categories
 FeedbackConfig(
-  categories: [
-    FeedbackCategory(label: 'Crash',      emoji: '💥'),
-    FeedbackCategory(label: 'Wrong data', emoji: '📊'),
-    FeedbackCategory(label: 'Suggestion', emoji: '💡'),
-  ],
-  ...
+  backend: ...,
+  categories: [FeedbackCategory.bug, FeedbackCategory.enhancement],
 )
 ```
-
-**Built-in defaults:**
-
-| Emoji | Label |
-|-------|-------|
-| 🐛 | Bug Report |
-| ✨ | Feature Request |
-| 🎨 | UI / UX |
-| ⚡ | Performance |
-| 💬 | Other |
 
 ---
 
@@ -185,11 +187,12 @@ Implement `FeedbackBackend` to send feedback anywhere:
 class SlackFeedbackBackend implements FeedbackBackend {
   @override
   Future<void> submit({
-    required String category,
+    required FeedbackCategory category,
     required String text,
     Uint8List? screenshot,
   }) async {
-    // post to Slack webhook, Firestore, email, etc.
+    // Use category.displayLabel, category.emoji, category.githubLabel, etc.
+    // Post to Slack webhook, Firestore, email, etc.
   }
 }
 ```
@@ -199,7 +202,6 @@ Then pass it to `FeedbackConfig`:
 ```dart
 FeedbackConfig(
   backend: SlackFeedbackBackend(),
-  ...
 )
 ```
 
@@ -209,12 +211,11 @@ FeedbackConfig(
 
 When a user submits feedback, the package:
 
-1. Uploads the screenshot PNG to `feedback/screenshots/<timestamp>.png` in
-   your repo
-2. Creates an issue with:
+1. Uploads the screenshot PNG to `feedback/screenshots/<timestamp>.png`
+2. Creates an issue labelled with the matching GitHub label:
 
 ```
-Title: [Bug Report] App crashes when tapping the settings icon
+Title:  [Bug Report] App crashes when tapping the settings icon
 
 Category: Bug Report
 
@@ -229,14 +230,12 @@ Screenshot:
 
 ## Advanced: Accessing the Notifier
 
-For advanced use cases (e.g. triggering feedback programmatically):
-
 ```dart
-// Read config without rebuilding
-final notifier = FeedbackScope.read(context);
-
-// Read config and subscribe to state changes
+// Subscribe to state changes (use in build methods)
 final notifier = FeedbackScope.of(context);
+
+// Read without subscribing (use in callbacks)
+final notifier = FeedbackScope.read(context);
 ```
 
 ---

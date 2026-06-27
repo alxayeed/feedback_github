@@ -1,6 +1,7 @@
 import 'package:feedback/feedback.dart';
 import 'package:flutter/material.dart';
 
+import '../config/feedback_category.dart';
 import '../state/feedback_scope.dart';
 
 /// A pre-built [FloatingActionButton] that launches the feedback flow.
@@ -64,9 +65,12 @@ class FeedbackButton extends StatelessWidget {
     final config = FeedbackScope.read(context).config;
 
     BetterFeedback.of(context).show((UserFeedback feedback) async {
-      // The sheet stores the selected category in extras.
-      final category = feedback.extra?['category'] as String? ??
-          config.categories.first.label;
+      // Reconstruct the enum value from its name stored by the sheet.
+      final categoryName = feedback.extra?['category'] as String?;
+      final category = FeedbackCategory.values.firstWhere(
+        (c) => c.name == categoryName,
+        orElse: () => config.categories.first,
+      );
 
       await config.backend.submit(
         category: category,

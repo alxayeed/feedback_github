@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
 
+import '../config/feedback_category.dart';
 import 'feedback_backend.dart';
 
 /// A [FeedbackBackend] that submits feedback to a GitHub repository.
@@ -11,7 +12,8 @@ import 'feedback_backend.dart';
 /// 1. Uploads the screenshot PNG to `<screenshotDir>/<timestamp>.png` in the
 ///    repo via the GitHub Contents API.
 /// 2. Creates a GitHub Issue with the category, description, and an embedded
-///    screenshot image (Markdown `![]()` syntax).
+///    screenshot image (Markdown `![]()` syntax). The issue is automatically
+///    labelled using [FeedbackCategory.githubLabel].
 ///
 /// **Setup:**
 /// - Create a fine-grained Personal Access Token with **Contents** (write) and
@@ -57,7 +59,7 @@ class GitHubFeedbackBackend implements FeedbackBackend {
 
   @override
   Future<void> submit({
-    required String category,
+    required FeedbackCategory category,
     required String text,
     Uint8List? screenshot,
   }) async {
@@ -111,7 +113,7 @@ class GitHubFeedbackBackend implements FeedbackBackend {
 
   /// Creates a GitHub Issue with the feedback details.
   Future<void> _createIssue({
-    required String category,
+    required FeedbackCategory category,
     required String text,
     String? screenshotUrl,
   }) async {
@@ -120,7 +122,7 @@ class GitHubFeedbackBackend implements FeedbackBackend {
     );
 
     final body = StringBuffer()
-      ..writeln('**Category:** $category')
+      ..writeln('**Category:** ${category.displayLabel}')
       ..writeln()
       ..writeln('**Description:**')
       ..writeln(text);
@@ -129,16 +131,17 @@ class GitHubFeedbackBackend implements FeedbackBackend {
       body
         ..writeln()
         ..writeln('**Screenshot:**')
-        ..writeln('![$category screenshot]($screenshotUrl)');
+        ..writeln('![${category.displayLabel} screenshot]($screenshotUrl)');
     }
 
     final response = await http.post(
       uri,
       headers: _headers,
       body: jsonEncode({
-        'title': '[$category] ${_truncate(text, 60)}',
+        'title': '[${category.displayLabel}] ${_truncate(text, 60)}',
         'body': body.toString(),
-        'labels': ['feedback'],
+        // githubLabel maps to GitHub's built-in labels where possible.
+        'labels': [category.githubLabel],
       }),
     );
 

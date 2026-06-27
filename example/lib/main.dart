@@ -27,11 +27,8 @@ class ExampleApp extends StatelessWidget {
           repoName: _kRepo,
           branch: 'feedback',
         ),
-        // Optionally override categories:
-        // categories: [
-        //   FeedbackCategory(label: 'Crash', emoji: '💥'),
-        //   FeedbackCategory(label: 'Wrong data', emoji: '📊'),
-        // ],
+        // Optionally override categories with enum values:
+        // categories: [FeedbackCategory.bug, FeedbackCategory.enhancement],
       ),
       child: MaterialApp(
         title: 'feedback_github — Example',
