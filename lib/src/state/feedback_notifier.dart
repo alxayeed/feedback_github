@@ -27,10 +27,14 @@ class FeedbackNotifier extends ChangeNotifier {
   FeedbackCategory? _selectedCategory;
   String _text = '';
   Uint8List? _screenshotBytes;
+  int _explicitButtonsCount = 0;
 
   // ---------------------------------------------------------------------------
   // Getters
   // ---------------------------------------------------------------------------
+
+  /// Whether there is an explicit feedback button currently mounted in the tree.
+  bool get hasExplicitButton => _explicitButtonsCount > 0;
 
   /// Whether a submission is currently in flight.
   bool get isSubmitting => _isSubmitting;
@@ -56,6 +60,18 @@ class FeedbackNotifier extends ChangeNotifier {
   // ---------------------------------------------------------------------------
   // Mutators
   // ---------------------------------------------------------------------------
+
+  /// Increments the count of active explicit feedback buttons.
+  void registerExplicitButton() {
+    _explicitButtonsCount++;
+    if (!isDisposed) notifyListeners();
+  }
+
+  /// Decrements the count of active explicit feedback buttons.
+  void unregisterExplicitButton() {
+    _explicitButtonsCount--;
+    if (!isDisposed) notifyListeners();
+  }
 
   /// Selects [category] and clears any existing error.
   void selectCategory(FeedbackCategory category) {
@@ -129,5 +145,16 @@ class FeedbackNotifier extends ChangeNotifier {
       _isSubmitting = false;
       notifyListeners();
     }
+  }
+
+  bool _isDisposed = false;
+
+  /// Whether this notifier has been disposed.
+  bool get isDisposed => _isDisposed;
+
+  @override
+  void dispose() {
+    _isDisposed = true;
+    super.dispose();
   }
 }

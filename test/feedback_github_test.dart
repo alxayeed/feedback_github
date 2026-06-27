@@ -378,6 +378,125 @@ void main() {
     material = tester.widget<Material>(sheetMaterialFinder);
     expect(material.color, const Color(0xFF303030));
   });
+
+  testWidgets('DraggableFeedbackButton hides when an explicit FeedbackButton is present', (WidgetTester tester) async {
+    bool showExplicitButton = false;
+    late StateSetter setPageState;
+
+    await tester.pumpWidget(
+      GithubFeedback(
+        config: FeedbackConfig(
+          enabled: true,
+          backend: DummyBackend(),
+        ),
+        child: MaterialApp(
+          home: Scaffold(
+            body: StatefulBuilder(
+              builder: (context, setState) {
+                setPageState = setState;
+                return Stack(
+                  children: [
+                    const Text('App Body'),
+                    if (showExplicitButton)
+                      const FeedbackButton(),
+                  ],
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Default DraggableFeedbackButton should be present
+    expect(find.byType(DraggableFeedbackButton), findsOneWidget);
+    // There should only be 1 FloatingActionButton in the tree (the default one)
+    expect(find.byType(FloatingActionButton), findsOneWidget);
+
+    // Now, show the explicit FeedbackButton
+    setPageState(() {
+      showExplicitButton = true;
+    });
+    // Pump widgets and let the post frame callback run
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    // The default DraggableFeedbackButton should now be hidden (returns SizedBox.shrink)
+    // The only FloatingActionButton in the tree should be the explicit one.
+    expect(find.byType(FloatingActionButton), findsOneWidget);
+
+    // Let's hide the explicit one again and verify DraggableFeedbackButton shows up.
+    setPageState(() {
+      showExplicitButton = false;
+    });
+    // Pump widgets and let the post frame callback run
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    // DraggableFeedbackButton is active again, so there should still be 1 FloatingActionButton.
+    expect(find.byType(FloatingActionButton), findsOneWidget);
+  });
+
+  testWidgets('FeedbackButton colors and icon can be customized', (WidgetTester tester) async {
+    const customIcon = Icon(Icons.star, key: Key('custom_icon'));
+    const customBg = Colors.purple;
+    const customFg = Colors.yellow;
+
+    await tester.pumpWidget(
+      GithubFeedback(
+        config: FeedbackConfig(
+          enabled: true,
+          backend: DummyBackend(),
+        ),
+        child: const MaterialApp(
+          home: Scaffold(
+            floatingActionButton: FeedbackButton(
+              icon: customIcon,
+              backgroundColor: customBg,
+              foregroundColor: customFg,
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.byKey(const Key('custom_icon')), findsOneWidget);
+
+    final fab = tester.widget<FloatingActionButton>(find.byType(FloatingActionButton));
+    expect(fab.backgroundColor, customBg);
+    expect(fab.foregroundColor, customFg);
+  });
+
+  testWidgets('Default floating button can be customized via FeedbackConfig', (WidgetTester tester) async {
+    const customIcon = Icon(Icons.star, key: Key('custom_config_icon'));
+    const customBg = Colors.blue;
+    const customFg = Colors.red;
+
+    await tester.pumpWidget(
+      GithubFeedback(
+        config: FeedbackConfig(
+          enabled: true,
+          backend: DummyBackend(),
+          icon: customIcon,
+          backgroundColor: customBg,
+          foregroundColor: customFg,
+        ),
+        child: const MaterialApp(
+          home: Scaffold(
+            body: Text('App Body'),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.byKey(const Key('custom_config_icon')), findsOneWidget);
+
+    final fab = tester.widget<FloatingActionButton>(find.byType(FloatingActionButton));
+    expect(fab.backgroundColor, customBg);
+    expect(fab.foregroundColor, customFg);
+  });
 }
 
 class MockFailureBackend implements FeedbackBackend {

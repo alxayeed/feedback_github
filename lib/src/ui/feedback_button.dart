@@ -38,12 +38,15 @@ enum FeedbackButtonVariant {
 ///   label: Text('Report a bug'),
 /// )
 /// ```
-class FeedbackButton extends StatelessWidget {
+class FeedbackButton extends StatefulWidget {
   const FeedbackButton({
     super.key,
     this.icon = const Icon(Icons.feedback_outlined),
     this.label = const Text('Feedback'),
     this.variant = FeedbackButtonVariant.small,
+    this.isDefaultFloatingButton = false,
+    this.backgroundColor,
+    this.foregroundColor,
   });
 
   /// Icon shown on the FAB. Defaults to `Icons.feedback_outlined`.
@@ -56,29 +59,76 @@ class FeedbackButton extends StatelessWidget {
   /// The visual variant of the button. Defaults to [FeedbackButtonVariant.small].
   final FeedbackButtonVariant variant;
 
+  /// Internal flag to indicate if this is the default floating button.
+  final bool isDefaultFloatingButton;
+
+  /// Custom background color of the button.
+  final Color? backgroundColor;
+
+  /// Custom foreground color (icon/text color) of the button.
+  final Color? foregroundColor;
+
+  @override
+  State<FeedbackButton> createState() => _FeedbackButtonState();
+}
+
+class _FeedbackButtonState extends State<FeedbackButton> {
+  FeedbackNotifier? _notifier;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final newNotifier = FeedbackScope.of(context);
+    if (_notifier != newNotifier) {
+      if (!widget.isDefaultFloatingButton) {
+        final oldNotifier = _notifier;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          oldNotifier?.unregisterExplicitButton();
+          newNotifier?.registerExplicitButton();
+        });
+      }
+      _notifier = newNotifier;
+    }
+  }
+
+  @override
+  void dispose() {
+    if (!widget.isDefaultFloatingButton) {
+      final notifierToUnregister = _notifier;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        notifierToUnregister?.unregisterExplicitButton();
+      });
+    }
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     // If GithubFeedback is disabled, notifier will be null because the scope is not in the tree.
-    final notifier = FeedbackScope.of(context);
+    final notifier = _notifier;
 
     if (notifier == null || !notifier.config.enabled) {
       return const SizedBox.shrink();
     }
 
-    if (variant == FeedbackButtonVariant.big) {
+    if (widget.variant == FeedbackButtonVariant.big) {
       return FloatingActionButton.extended(
         // Explicit heroTag prevents Hero conflicts when consumers also have FABs.
         heroTag: 'feedback_github_fab',
         onPressed: () => _showFeedback(context),
-        icon: icon,
-        label: label,
+        icon: widget.icon,
+        label: widget.label,
+        backgroundColor: widget.backgroundColor,
+        foregroundColor: widget.foregroundColor,
       );
     } else {
       return FloatingActionButton(
         // Explicit heroTag prevents Hero conflicts when consumers also have FABs.
         heroTag: 'feedback_github_fab',
         onPressed: () => _showFeedback(context),
-        child: icon,
+        backgroundColor: widget.backgroundColor,
+        foregroundColor: widget.foregroundColor,
+        child: widget.icon,
       );
     }
   }

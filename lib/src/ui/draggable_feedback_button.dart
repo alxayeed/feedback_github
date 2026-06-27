@@ -23,7 +23,8 @@ class _DraggableFeedbackButtonState extends State<DraggableFeedbackButton> {
     final notifier = FeedbackScope.of(context);
     if (notifier == null ||
         !notifier.config.enabled ||
-        !notifier.config.showFloatingButton) {
+        !notifier.config.showFloatingButton ||
+        notifier.hasExplicitButton) {
       return const SizedBox.shrink();
     }
 
@@ -54,7 +55,8 @@ class _DraggableFeedbackButtonState extends State<DraggableFeedbackButton> {
           child: Offstage(
             offstage: controller.isVisible,
             child: GestureDetector(
-              behavior: HitTestBehavior.deferToChild,
+              behavior: HitTestBehavior.opaque,
+              onPanStart: (_) {}, // Claim gestures eagerly in the arena
               onPanUpdate: (details) {
                 setState(() {
                   _offset = Offset(
@@ -63,7 +65,12 @@ class _DraggableFeedbackButtonState extends State<DraggableFeedbackButton> {
                   );
                 });
               },
-              child: const FeedbackButton(),
+              child: FeedbackButton(
+                isDefaultFloatingButton: true,
+                icon: notifier.config.icon ?? const Icon(Icons.feedback_outlined),
+                backgroundColor: notifier.config.backgroundColor,
+                foregroundColor: notifier.config.foregroundColor,
+              ),
             ),
           ),
         );

@@ -25,6 +25,9 @@ class FeedbackConfig {
     this.categories = FeedbackCategory.values,
     this.showFloatingButton = true,
     this.themeMode,
+    this.icon,
+    this.backgroundColor,
+    this.foregroundColor,
   });
 
   /// The backend responsible for submitting feedback.
@@ -58,4 +61,13 @@ class FeedbackConfig {
   ///
   /// Defaults to [ThemeMode.system].
   final ThemeMode? themeMode;
+
+  /// Optional custom icon for the default floating feedback button.
+  final Widget? icon;
+
+  /// Optional custom background color for the default floating feedback button.
+  final Color? backgroundColor;
+
+  /// Optional custom foreground color for the default floating feedback button.
+  final Color? foregroundColor;
 }
