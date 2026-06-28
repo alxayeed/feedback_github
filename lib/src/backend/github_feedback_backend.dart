@@ -82,8 +82,7 @@ class GitHubFeedbackBackend implements FeedbackBackend {
 
   /// Uploads [bytes] as a PNG to the repo and returns its `download_url`.
   Future<String> _uploadScreenshot(Uint8List bytes) async {
-    final filename =
-        'screenshot_${DateTime.now().millisecondsSinceEpoch}.png';
+    final filename = 'screenshot_${DateTime.now().millisecondsSinceEpoch}.png';
     final repoPath = '$screenshotDir/$filename';
 
     final uri = Uri.parse(
@@ -154,11 +153,11 @@ class GitHubFeedbackBackend implements FeedbackBackend {
   }
 
   Map<String, String> get _headers => {
-        'Authorization': 'Bearer $token',
-        'Accept': 'application/vnd.github+json',
-        'X-GitHub-Api-Version': '2022-11-28',
-        'Content-Type': 'application/json',
-      };
+    'Authorization': 'Bearer $token',
+    'Accept': 'application/vnd.github+json',
+    'X-GitHub-Api-Version': '2022-11-28',
+    'Content-Type': 'application/json',
+  };
 
   /// Truncates [text] to [max] characters, appending `…` if needed.
   String _truncate(String text, int max) {

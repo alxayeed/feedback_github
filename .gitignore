@@ -6,11 +6,11 @@ pubspec.lock
 *.iml
 
 # Android
-android/
+#android/
 .gradle/
 
 # iOS
-ios/
+#ios/
 
 # IDEs
 .idea/
@@ -22,3 +22,6 @@ ios/
 
 # Planning & personal notes (not for git)
 PLANNING.md
+
+# FVM Version Cache
+.fvm/

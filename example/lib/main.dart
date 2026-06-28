@@ -4,9 +4,10 @@ import 'package:feedback_github/feedback_github.dart';
 
 /// Replace these with your real values before running.
 /// Never commit real tokens — use --dart-define or a .env loader.
-const _kToken = String.fromEnvironment('GH_TOKEN', defaultValue: 'YOUR_TOKEN');
-const _kOwner = String.fromEnvironment('GH_OWNER', defaultValue: 'your-org');
-const _kRepo = String.fromEnvironment('GH_REPO', defaultValue: 'your-repo');
+const _kToken = "";
+const _kOwner = "alxayeed";
+const _kRepo = "feedback_github";
+const _kBranch = "feedback";
 
 void main() {
   runApp(const ExampleApp());
@@ -25,7 +26,7 @@ class ExampleApp extends StatelessWidget {
           token: _kToken,
           repoOwner: _kOwner,
           repoName: _kRepo,
-          branch: 'feedback',
+          branch: _kBranch,
         ),
         // Configure global button styling
         icon: const Icon(Icons.bug_report, color: Colors.yellow),
@@ -35,10 +36,7 @@ class ExampleApp extends StatelessWidget {
       child: MaterialApp(
         title: 'feedback_github — Example',
         debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          colorSchemeSeed: Colors.indigo,
-          useMaterial3: true,
-        ),
+        theme: ThemeData(colorSchemeSeed: Colors.indigo, useMaterial3: true),
         home: const HomePage(),
       ),
     );
@@ -55,10 +53,7 @@ class HomePage extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('feedback_github'),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: const Text('feedback_github'), centerTitle: true),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 32),
@@ -106,9 +101,10 @@ class HomePage extends StatelessWidget {
               _InfoCard(
                 icon: Icons.token_outlined,
                 title: 'Token',
-                value: _kToken == 'YOUR_TOKEN'
-                    ? 'Not configured (placeholder)'
-                    : '••••••••${_kToken.substring(_kToken.length - 4)}',
+                value:
+                    _kToken == 'YOUR_TOKEN'
+                        ? 'Not configured (placeholder)'
+                        : '••••••••${_kToken.substring(_kToken.length - 4)}',
               ),
               const SizedBox(height: 8),
               _InfoCard(
@@ -132,9 +128,7 @@ class CustomFeedbackPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Custom Feedback Page'),
-      ),
+      appBar: AppBar(title: const Text('Custom Feedback Page')),
       floatingActionButton: const FeedbackButton(
         variant: FeedbackButtonVariant.big,
         icon: Icon(Icons.support_agent),
@@ -148,17 +142,13 @@ class CustomFeedbackPage extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(
-                Icons.support_agent,
-                size: 80,
-                color: Colors.green,
-              ),
+              const Icon(Icons.support_agent, size: 80, color: Colors.green),
               const SizedBox(height: 24),
               Text(
                 'Custom Feedback Screen',
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 12),
               const Text(
@@ -209,15 +199,15 @@ class _InfoCard extends StatelessWidget {
             children: [
               Text(
                 title,
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: cs.onSurfaceVariant,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.labelSmall?.copyWith(color: cs.onSurfaceVariant),
               ),
               Text(
                 value,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w500,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
               ),
             ],
           ),
