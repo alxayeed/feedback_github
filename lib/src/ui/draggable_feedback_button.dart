@@ -54,10 +54,9 @@ class _DraggableFeedbackButtonState extends State<DraggableFeedbackButton> {
           top: targetY,
           child: Offstage(
             offstage: controller.isVisible,
-            child: GestureDetector(
+            child: Listener(
               behavior: HitTestBehavior.opaque,
-              onPanStart: (_) {}, // Claim gestures eagerly in the arena
-              onPanUpdate: (details) {
+              onPointerMove: (details) {
                 setState(() {
                   _offset = Offset(
                     (targetX + details.delta.dx).clamp(minX, maxX),
