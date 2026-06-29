@@ -2,6 +2,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:feedback_github/feedback_github.dart';
+import 'package:feedback_github/src/feedback/feedback.dart';
 
 class DummyBackend implements FeedbackBackend {
   @override
@@ -192,6 +193,13 @@ void main() {
   });
 
   testWidgets('Snackbar shows on successful submission', (WidgetTester tester) async {
+    tester.view.physicalSize = const Size(800, 1000);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
     await tester.pumpWidget(
       GithubFeedback(
         config: FeedbackConfig(
@@ -215,6 +223,12 @@ void main() {
     });
     await tester.pumpAndSettle();
 
+    // Expand to fullscreen so the submit button fits on screen
+    final sheetController =
+        BetterFeedback.of(tester.element(find.byType(TextField))).sheetController;
+    sheetController.jumpTo(1.0);
+    await tester.pumpAndSettle();
+
     // Fill feedback and submit
     await tester.tap(find.textContaining('Bug Report'));
     await tester.pumpAndSettle();
@@ -224,7 +238,7 @@ void main() {
 
     // Tap send
     await tester.runAsync(() async {
-      await tester.tap(find.text('Send'));
+      await tester.tap(find.text('Submit Feedback'));
       await tester.pump(); // Start send feedback process
       await Future.delayed(const Duration(milliseconds: 500));
       await tester.pump(); // complete screenshot and call submission
@@ -238,6 +252,13 @@ void main() {
   });
 
   testWidgets('Snackbar shows error on failed submission', (WidgetTester tester) async {
+    tester.view.physicalSize = const Size(800, 1000);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
     await tester.pumpWidget(
       GithubFeedback(
         config: FeedbackConfig(
@@ -261,6 +282,12 @@ void main() {
     });
     await tester.pumpAndSettle();
 
+    // Expand to fullscreen so the submit button fits on screen
+    final sheetController =
+        BetterFeedback.of(tester.element(find.byType(TextField))).sheetController;
+    sheetController.jumpTo(1.0);
+    await tester.pumpAndSettle();
+
     // Fill feedback and submit
     await tester.tap(find.textContaining('Bug Report'));
     await tester.pumpAndSettle();
@@ -270,7 +297,7 @@ void main() {
 
     // Tap send
     await tester.runAsync(() async {
-      await tester.tap(find.text('Send'));
+      await tester.tap(find.text('Submit Feedback'));
       await tester.pump(); // Start send feedback process
       await Future.delayed(const Duration(milliseconds: 500));
       await tester.pump(); // complete screenshot and call submission

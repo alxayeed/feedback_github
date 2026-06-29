@@ -102,7 +102,7 @@ class HomePage extends StatelessWidget {
                 icon: Icons.token_outlined,
                 title: 'Token',
                 value:
-                    _kToken == 'YOUR_TOKEN'
+                    _kToken.isEmpty
                         ? 'Not configured (placeholder)'
                         : '••••••••${_kToken.substring(_kToken.length - 4)}',
               ),

@@ -1,6 +1,7 @@
 // ignore_for_file: public_member_api_docs
 
 import 'package:feedback_github/src/feedback/feedback.dart';
+import 'package:feedback_github/src/state/feedback_scope.dart';
 import 'package:feedback_github/src/feedback/src/controls_column.dart';
 import 'package:feedback_github/src/feedback/src/feedback_bottom_sheet.dart';
 import 'package:feedback_github/src/feedback/src/paint_on_background.dart';
@@ -11,6 +12,7 @@ import 'package:feedback_github/src/feedback/src/screenshot.dart';
 import 'package:feedback_github/src/feedback/src/theme/feedback_theme.dart';
 import 'package:feedback_github/src/feedback/src/utilities/back_button_interceptor.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 typedef FeedbackButtonPress = void Function(BuildContext context);
 
@@ -58,6 +60,7 @@ class FeedbackWidgetState extends State<FeedbackWidget>
   //   `DraggableScrollableController` when the latter gets into production.
   //   See: https://github.com/flutter/flutter/pull/135366.
   ValueNotifier<double> sheetProgress = ValueNotifier(0);
+  bool _hasCapturedDrawing = false;
 
   @visibleForTesting
   late PainterController painterController = create();
@@ -79,14 +82,48 @@ class FeedbackWidgetState extends State<FeedbackWidget>
     return controller;
   }
 
+  void _onSheetProgressChanged() async {
+    final progress = sheetProgress.value;
+    if (progress > 0.6) {
+      if (!_hasCapturedDrawing) {
+        final renderObject =
+            screenshotController.containerKey.currentContext?.findRenderObject();
+        if (renderObject is! RenderRepaintBoundary) {
+          return;
+        }
+        _hasCapturedDrawing = true;
+        try {
+          final bytes = await screenshotController.capture(
+            pixelRatio: widget.pixelRatio,
+            delay: const Duration(milliseconds: 0),
+          );
+          if (mounted) {
+            final notifier = FeedbackScope.read(context);
+            if (notifier != null) {
+              notifier.screenshotBytes = bytes;
+            }
+          }
+        } catch (e) {
+          debugPrint('Error capturing screenshot with drawings: $e');
+        }
+      }
+    } else {
+      if (_hasCapturedDrawing) {
+        _hasCapturedDrawing = false;
+      }
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     BackButtonInterceptor.add(backButtonIntercept);
+    sheetProgress.addListener(_onSheetProgressChanged);
   }
 
   @override
   void dispose() {
+    sheetProgress.removeListener(_onSheetProgressChanged);
     super.dispose();
     _controller.dispose();
     BackButtonInterceptor.remove(backButtonIntercept);
@@ -124,6 +161,12 @@ class FeedbackWidgetState extends State<FeedbackWidget>
       _controller.reverse();
       // Reset the sheet progress so the fade is no longer applied.
       sheetProgress.value = 0;
+      painterController.clear();
+      _hasCapturedDrawing = false;
+      try {
+        // No notifier reset needed here since painterController.clear() clears the drawings,
+        // and a clean screenshot is captured when opening the feedback again.
+      } catch (_) {}
     }
   }
 

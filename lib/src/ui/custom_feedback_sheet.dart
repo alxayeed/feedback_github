@@ -59,8 +59,8 @@ class _CustomFeedbackSheetState extends State<_CustomFeedbackSheet> {
 
   bool get _canSubmit =>
       !_submitting &&
-          _selected != null &&
-          _textController.text.trim().isNotEmpty;
+      _selected != null &&
+      _textController.text.trim().isNotEmpty;
 
   @override
   void didChangeDependencies() {
@@ -161,12 +161,11 @@ class _CustomFeedbackSheetState extends State<_CustomFeedbackSheet> {
             children: [
               Text(
                 'Send Feedback',
-                style: (_isFullscreen
-                    ? theme.textTheme.titleLarge
-                    : theme.textTheme.titleMedium)
-                    ?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                style:
+                    (_isFullscreen
+                            ? theme.textTheme.titleLarge
+                            : theme.textTheme.titleMedium)
+                        ?.copyWith(fontWeight: FontWeight.bold),
               ),
               if (_isFullscreen) ...[
                 IconButton(
@@ -186,25 +185,26 @@ class _CustomFeedbackSheetState extends State<_CustomFeedbackSheet> {
               ] else ...[
                 _submitting
                     ? const SizedBox(
-                  width: 22,
-                  height: 22,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2.5,
-                  ),
-                )
+                        width: 22,
+                        height: 22,
+                        child: CircularProgressIndicator(strokeWidth: 2.5),
+                      )
                     : FilledButton.icon(
-                  onPressed: _canSubmit ? _submit : null,
-                  icon: const Icon(Icons.send, size: 14),
-                  label: const Text('Send'),
-                  style: FilledButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    minimumSize: Size.zero,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                ),
+                        onPressed: _canSubmit ? _submit : null,
+                        icon: const Icon(Icons.send, size: 14),
+                        label: const Text('Send'),
+                        style: FilledButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
+                          minimumSize: Size.zero,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                      ),
               ],
             ],
           ),
@@ -226,10 +226,7 @@ class _CustomFeedbackSheetState extends State<_CustomFeedbackSheet> {
               width: double.infinity,
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(12),
-                child: Image.memory(
-                  screenshotBytes,
-                  fit: BoxFit.contain,
-                ),
+                child: Image.memory(screenshotBytes, fit: BoxFit.contain),
               ),
             ),
             const SizedBox(height: 20),
@@ -245,81 +242,104 @@ class _CustomFeedbackSheetState extends State<_CustomFeedbackSheet> {
           SizedBox(height: _isFullscreen ? 8 : 4),
           _isFullscreen
               ? Wrap(
-            spacing: 6,
-            runSpacing: 6,
-            children: cats.map((cat) {
-              final isSelected = _selected == cat;
-              return ChoiceChip(
-                label: Text(
-                  '${cat.emoji}  ${cat.displayLabel}',
-                  style: TextStyle(fontSize: 12, color: cs.onSurfaceVariant),
-                ),
-                selected: isSelected,
-                onSelected: _submitting
-                    ? null
-                    : (_) => setState(() => _selected = cat),
-                backgroundColor: theme.cardColor,
-                selectedColor: cs.primaryContainer,
-                color: WidgetStateProperty.resolveWith<Color?>((states) {
-                  if (states.contains(WidgetState.selected)) return cs.primaryContainer;
-                  return theme.cardColor;
-                }),
-                labelStyle: TextStyle(
-                  color: theme.focusColor,
-                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                ),
-                visualDensity: VisualDensity.compact,
-                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(6),
-                  side: BorderSide(
-                    color: isSelected ? cs.primary : theme.focusColor,
-                  ),
-                ),
-              );
-            }).toList(),
-          )
-              : SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: cats.map((cat) {
-                final isSelected = _selected == cat;
-                return Padding(
-                  padding: const EdgeInsets.only(right: 6.0),
-                  child: ChoiceChip(
-                    label: Text(
-                      '${cat.emoji}  ${cat.displayLabel}',
-                      style: TextStyle(fontSize: 12, color: cs.onSurfaceVariant),
-                    ),
-                    selected: isSelected,
-                    onSelected: _submitting
-                        ? null
-                        : (_) => setState(() => _selected = cat),
-                    backgroundColor: theme.cardColor,
-                    selectedColor: cs.primaryContainer,
-                    color: WidgetStateProperty.resolveWith<Color?>((states) {
-                      if (states.contains(WidgetState.selected)) return cs.primaryContainer;
-                      return theme.cardColor;
-                    }),
-                    labelStyle: TextStyle(
-                      color: isSelected ? cs.onPrimaryContainer : theme.focusColor,
-                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                    ),
-                    visualDensity: VisualDensity.compact,
-                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(6),
-                      side: BorderSide(
-                        color: isSelected ? cs.primary : theme.focusColor,
+                  spacing: 6,
+                  runSpacing: 6,
+                  children: cats.map((cat) {
+                    final isSelected = _selected == cat;
+                    return ChoiceChip(
+                      label: Text(
+                        '${cat.emoji}  ${cat.displayLabel}',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: cs.onSurfaceVariant,
+                        ),
                       ),
-                    ),
+                      selected: isSelected,
+                      onSelected: _submitting
+                          ? null
+                          : (_) => setState(() => _selected = cat),
+                      backgroundColor: theme.cardColor,
+                      selectedColor: cs.primaryContainer,
+                      color: WidgetStateProperty.resolveWith<Color?>((states) {
+                        if (states.contains(WidgetState.selected))
+                          return cs.primaryContainer;
+                        return theme.cardColor;
+                      }),
+                      labelStyle: TextStyle(
+                        color: theme.focusColor,
+                        fontWeight: isSelected
+                            ? FontWeight.w600
+                            : FontWeight.normal,
+                      ),
+                      visualDensity: VisualDensity.compact,
+                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6),
+                        side: BorderSide(
+                          color: isSelected ? cs.primary : theme.focusColor,
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                )
+              : SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: cats.map((cat) {
+                      final isSelected = _selected == cat;
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 6.0),
+                        child: ChoiceChip(
+                          label: Text(
+                            '${cat.emoji}  ${cat.displayLabel}',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: cs.onSurfaceVariant,
+                            ),
+                          ),
+                          selected: isSelected,
+                          onSelected: _submitting
+                              ? null
+                              : (_) => setState(() => _selected = cat),
+                          backgroundColor: theme.cardColor,
+                          selectedColor: cs.primaryContainer,
+                          color: WidgetStateProperty.resolveWith<Color?>((
+                            states,
+                          ) {
+                            if (states.contains(WidgetState.selected))
+                              return cs.primaryContainer;
+                            return theme.cardColor;
+                          }),
+                          labelStyle: TextStyle(
+                            color: isSelected
+                                ? cs.onPrimaryContainer
+                                : theme.focusColor,
+                            fontWeight: isSelected
+                                ? FontWeight.w600
+                                : FontWeight.normal,
+                          ),
+                          visualDensity: VisualDensity.compact,
+                          materialTapTargetSize:
+                              MaterialTapTargetSize.shrinkWrap,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(6),
+                            side: BorderSide(
+                              color: isSelected ? cs.primary : theme.focusColor,
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
                   ),
-                );
-              }).toList(),
-            ),
-          ),
+                ),
           SizedBox(height: _isFullscreen ? 20 : 10),
 
           // ── Description field ──────────────────────────────────────────
@@ -359,7 +379,18 @@ class _CustomFeedbackSheetState extends State<_CustomFeedbackSheet> {
               filled: true,
               fillColor: theme.focusColor,
             ),
-            onChanged: (_) => setState(() {}),
+            onChanged: (_) => setState(() {
+              _isFullscreen = true;
+            }),
+            onTap: () {
+              if (_sheetController != null && _sheetController!.isAttached) {
+                _sheetController!.animateTo(
+                  1.0,
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeOut,
+                );
+              }
+            },
           ),
           SizedBox(height: _isFullscreen ? 12 : 6),
 
@@ -410,20 +441,20 @@ class _CustomFeedbackSheetState extends State<_CustomFeedbackSheet> {
               ),
               label: _submitting
                   ? SizedBox(
-                width: 22,
-                height: 22,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2.5,
-                  color: cs.onPrimary,
-                ),
-              )
+                      width: 22,
+                      height: 22,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2.5,
+                        color: cs.onPrimary,
+                      ),
+                    )
                   : const Text(
-                'Submit Feedback',
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 15,
-                ),
-              ),
+                      'Submit Feedback',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 15,
+                      ),
+                    ),
             ),
         ],
       ),

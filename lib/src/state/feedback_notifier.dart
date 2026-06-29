@@ -51,6 +51,11 @@ class FeedbackNotifier extends ChangeNotifier {
   /// The screenshot bytes captured when the feedback flow is initiated.
   Uint8List? get screenshotBytes => _screenshotBytes;
 
+  set screenshotBytes(Uint8List? value) {
+    _screenshotBytes = value;
+    notifyListeners();
+  }
+
   /// Whether all required fields are filled and submission is not in progress.
   bool get canSubmit =>
       !_isSubmitting &&
@@ -112,7 +117,7 @@ class FeedbackNotifier extends ChangeNotifier {
     _selectedCategory = null;
     _text = '';
     _screenshotBytes = null;
-    notifyListeners();
+    if (!isDisposed) notifyListeners();
   }
 
   // ---------------------------------------------------------------------------
